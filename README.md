@@ -1,7 +1,7 @@
 # Diabolo menu
 
 Powershell script, gemaakt door Diabolo voor Diabolo. Alle hoofdzakelijk functies voor wijzigingen en werkzaamheden worden in dit script toegevoegd.
-Bij vragen, opmerkingen of enige ander contact neem dan contact op met de [Sven] of [Ramon]
+Bij vragen, opmerkingen of enige ander contact neem dan contact op met [Sven] of [Ramon]
 
 ## Changelog
 
