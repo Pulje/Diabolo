@@ -766,10 +766,10 @@ Function Create-DON-Account {
 }
 
 #######################################
-# TOTAALBED ACCOUNT CREATIE <<<<<<<<<<<<<<<<<<<< 
+# TOTAALBED ACCOUNT CREATIE 
 #######################################
 
-Function Create-TOTAALBED-Account {
+Function Create-TOT-Account {
     if ($env:COMPUTERNAME -ne "TOTAD01"){
         cls
         return Write-Host "`r`nError - Script wordt niet uitgevoerd op TOTAD01!`r`n" -ForegroundColor Red
@@ -818,8 +818,8 @@ Function Create-TOTAALBED-Account {
         Enable-Mailbox -Identity $samaccountname
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
-                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
-        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
         
         return Write-Host "Account aangemaakt" -ForegroundColor Green
 
