@@ -810,7 +810,7 @@ Function Create-WES-Account {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://wesexch01.wes.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        $MBXDbs = Get-MailboxDatabase | Where-Object {$_.Identity -notlike "TCN-EU-*"} # This will exclude any DB that started with "TCN-EU-"
+        $MBXDbs = Get-MailboxDatabase
  
         # Loop through each of the MBXDbs
  
@@ -1099,6 +1099,7 @@ $account_menu_create_saas = New-Menu -Name 'SaaS Account creatie' -MenuItems @(
     (New-MenuItem -Name 'COM Account aanmaken' -Command 'Create-COM-Account')
     (New-MenuItem -Name 'DON Account aanmaken' -Command 'Create-DON-Account')
     (New-MenuItem -Name 'HGO Account aanmaken' -Command 'Create-HGO-Account')
+    (New-MenuItem -Name 'WES Account aanmaken' -Command 'Create-WES-Account')
     (New-MenuItem -Name '< Terug naar account creatie menu' -Command 'Show-Menu -Menu $account_menu_create')
 )
 
