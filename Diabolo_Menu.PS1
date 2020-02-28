@@ -454,12 +454,22 @@ Function Create-AKJ-Account {
 					$CopyFromUser.MemberOf | Where{$CopyToUser.MemberOf -notcontains $_} |  Add-ADGroupMember -Member $CopyToUser
         }
         
-        if (-not ([string]::IsNullOrEmpty($copyfrom)))
-        {
-      	  $CopyFromUser = Get-ADUser $copyfrom -prop MemberOf
-					$CopyToUser = Get-ADUser $samaccountname -prop MemberOf
-					$CopyFromUser.MemberOf | Where{$CopyToUser.MemberOf -notcontains $_} |  Add-ADGroupMember -Member $CopyToUser
+        ForEach ($MBXDB in $MBXDbs) {
+        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
+            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
+            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
+            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
+             
+            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
+            # Compare the sizes to find the smallest DB
+            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
+                {
+                $SmallestDBsize = $TotalDBSize
+                $SmallestDB = $MBXDB
+                }
         }
+
+        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
 				foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -512,7 +522,22 @@ Function Create-HGO-Account {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://hgoexch01.hgo.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        Enable-Mailbox -Identity $samaccountname
+        ForEach ($MBXDB in $MBXDbs) {
+        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
+            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
+            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
+            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
+             
+            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
+            # Compare the sizes to find the smallest DB
+            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
+                {
+                $SmallestDBsize = $TotalDBSize
+                $SmallestDB = $MBXDB
+                }
+        }
+
+        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
 				foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -563,7 +588,22 @@ Function Create-BZO-Account {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://bzoexch01.bz.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        Enable-Mailbox -Identity $samaccountname
+        ForEach ($MBXDB in $MBXDbs) {
+        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
+            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
+            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
+            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
+             
+            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
+            # Compare the sizes to find the smallest DB
+            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
+                {
+                $SmallestDBsize = $TotalDBSize
+                $SmallestDB = $MBXDB
+                }
+        }
+
+        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
 				foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -615,7 +655,22 @@ Function Create-COM-Account {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://comexch02.companen.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        Enable-Mailbox -Identity $samaccountname
+        ForEach ($MBXDB in $MBXDbs) {
+        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
+            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
+            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
+            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
+             
+            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
+            # Compare the sizes to find the smallest DB
+            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
+                {
+                $SmallestDBsize = $TotalDBSize
+                $SmallestDB = $MBXDB
+                }
+        }
+
+        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
 				foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -624,7 +679,7 @@ Function Create-COM-Account {
         Add-MailboxPermission -Identity $samaccountname -User 'GG-Beheer' -AccessRight FullAccess -InheritanceType All -Automapping $false
         Add-MailboxPermission -Identity $samaccountname -User 'GG-Secretariaat' -AccessRight FullAccess -InheritanceType All -Automapping $false 
         
-        Write-Host "Log nu in met het account en start outlook op.`r`nLog vervolgens uit en druk op spatie." -ForegroundColor Green
+        Write-Host "Log nu in met het account en start outlook op.`r`nLog vervolgens uit en druk op enter." -ForegroundColor Green
         pause
         
         set-MailboxFolderPermission $agenda -User default -accessrights Author
@@ -645,24 +700,24 @@ Function Create-DON-Account {
         return Write-Host "`r`nError - Script wordt niet uitgevoerd op DONAD01!`r`n" -ForegroundColor Red
     } else {
         Do {
-					$firstname = Read-Host 'Voornaam invoeren'
-				} Until ($firstname)
+                    $firstname = Read-Host 'Voornaam invoeren'
+                } Until ($firstname)
         Do {
-					$lastname = Read-Host 'Achternaam invoeren'
-				} Until ($lastname)
+                    $lastname = Read-Host 'Achternaam invoeren'
+                } Until ($lastname)
         Do {
-					$functie = Read-Host 'Functie invoeren'
-				} Until ($functie)
+                    $functie = Read-Host 'Functie invoeren'
+                } Until ($functie)
         Do {
-					$telephone = Read-Host 'Telefoonnummer invoeren conform standaard (073 522 17 00)'
-				} Until ($telephone)
+                    $telephone = Read-Host 'Telefoonnummer invoeren conform standaard (073 522 17 00)'
+                } Until ($telephone)
         Do {
-					$description = Read-Host 'Titel (indien van toepassing) + voorletters + voornaam + achternaam invoeren'
-				} Until ($description)
+                    $description = Read-Host 'Titel (indien van toepassing) + voorletters + voornaam + achternaam invoeren'
+                } Until ($description)
         Do {
-					$manager = Read-Host 'Manager/Leidinggevende invoeren (username)'
-				} Until ($manager)
-				$copyfrom = Read-Host 'Rechten en postvakken overnemen van (username)'
+                    $manager = Read-Host 'Manager/Leidinggevende invoeren (username)'
+                } Until ($manager)
+                $copyfrom = Read-Host 'Rechten en postvakken overnemen van (username)'
         $displayname = $firstname + ' ' + $lastname
         $logonname = $firstname + $lastname.SubString(0,1) + '@donatus.nl'
         $samaccountname = $firstname + $lastname.SubString(0,1)
@@ -671,25 +726,123 @@ Function Create-DON-Account {
         
         if (-not ([string]::IsNullOrEmpty($copyfrom)))
         {
-      	  $CopyFromUser = Get-ADUser $copyfrom -prop MemberOf
-					$CopyToUser = Get-ADUser $samaccountname -prop MemberOf
-					$CopyFromUser.MemberOf | Where{$CopyToUser.MemberOf -notcontains $_} |  Add-ADGroupMember -Member $CopyToUser
+          $CopyFromUser = Get-ADUser $copyfrom -prop MemberOf
+                    $CopyToUser = Get-ADUser $samaccountname -prop MemberOf
+                    $CopyFromUser.MemberOf | Where{$CopyToUser.MemberOf -notcontains $_} |  Add-ADGroupMember -Member $CopyToUser
         }
         
         # Get current user
-	    	$CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+            $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
         # Set Credential
         $UserCredential = Get-Credential -UserName $CurrentUser -Message "Voer je credentials in voor Exchange"
         # Connect to EMS
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://DONEXCH02.DONATUS.LOCAL/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        Enable-Mailbox -Identity $samaccountname
+        ForEach ($MBXDB in $MBXDbs) {
+        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
+            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
+            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
+            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
+             
+            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
+            # Compare the sizes to find the smallest DB
+            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
+                {
+                $SmallestDBsize = $TotalDBSize
+                $SmallestDB = $MBXDB
+                }
+        }
+
+        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
-				foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
         foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
         
+        return Write-Host "Account aangemaakt" -ForegroundColor Green
+
+    }
+}
+
+
+#######################################
+# WIJN & STAEL ACCOUNT CREATIE
+#######################################
+
+Function Create-WES-Account {
+    if ($env:COMPUTERNAME -ne "WESAD01"){
+        cls
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op WESAD01!`r`n" -ForegroundColor Red
+    } else {
+        Do {
+                    $firstname = Read-Host 'Voornaam invoeren'
+                } Until ($firstname)
+        Do {
+                    $lastname = Read-Host 'Achternaam invoeren'
+                } Until ($lastname)
+        Do {
+                    $functie = Read-Host 'Functie invoeren'
+                } Until ($functie)
+        Do {
+                    $telephone = Read-Host 'Telefoonnummer invoeren'
+                } Until ($telephone)
+                $copyfrom = Read-Host 'Rechten en postvakken overnemen van (username)'
+        $displayname = $firstname + ' ' + $lastname
+        $logonname = $firstname.SubString(0,1) + '.' + $lastname + '@wijnenstael.nl'
+        $samaccountname = $firstname.SubString(0,1) + $lastname
+        $agenda = $logonname + '@companen.nl:\Agenda'
+        
+        New-ADUser -Name $displayname -GivenName $firstname -Surname $lastname -SamAccountName $samaccountname -UserPrincipalName $logonname -Path "OU=User Accounts,OU=Wijn en Stael,DC=wes,DC=local" -AccountPassword(Read-Host -AsSecureString "Input Password") -Title $functie -OfficePhone $telephone -Enabled $true -DisplayName $displayname
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+          $CopyFromUser = Get-ADUser $copyfrom -prop MemberOf
+                    $CopyToUser = Get-ADUser $samaccountname -prop MemberOf
+                    $CopyFromUser.MemberOf | Where{$CopyToUser.MemberOf -notcontains $_} |  Add-ADGroupMember -Member $CopyToUser
+        }
+        
+        # Get current user
+            $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+        # Set Credential
+        $UserCredential = Get-Credential -UserName $CurrentUser -Message "Voer je credentials in voor Exchange"
+        # Connect to EMS
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://wesexch01.wes.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
+        Import-PSSession $Session -DisableNameChecking
+
+        $MBXDbs = Get-MailboxDatabase | Where-Object {$_.Identity -notlike "TCN-EU-*"} # This will exclude any DB that started with "TCN-EU-"
+ 
+        # Loop through each of the MBXDbs
+ 
+        ForEach ($MBXDB in $MBXDbs) {
+        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
+            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
+            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
+            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
+             
+            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
+            # Compare the sizes to find the smallest DB
+            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
+                {
+                $SmallestDBsize = $TotalDBSize
+                $SmallestDB = $MBXDB
+                }
+        }
+
+        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
+        
+        $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+
+        Write-Host "Log nu in met het account en start outlook op.`r`nLog vervolgens uit en druk op enter." -ForegroundColor Green
+        pause
+        
+        set-MailboxFolderPermission $agenda -User default -accessrights LimitedDetails
+        if ($functie = 'Advocaat'){
+        Add-MailboxFolderPermission $agenda -User SecretatiaatMailboxPermissiesAdvocaten@wijnenstael.nl -AccessRights PublishingEditor
+        }
+
         return Write-Host "Account aangemaakt" -ForegroundColor Green
 
     }
