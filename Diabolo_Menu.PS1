@@ -695,6 +695,66 @@ Function Create-DON-Account {
     }
 }
 
+#######################################
+# TOTAALBED ACCOUNT CREATIE <<<<<<<<<<<<<<<<<<<< 
+#######################################
+
+Function Create-TOTAALBED-Account {
+    if ($env:COMPUTERNAME -ne "TOTAD01"){
+        cls
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op TOTAD01!`r`n" -ForegroundColor Red
+    } else {
+        Do {
+                    $firstname = Read-Host 'Voornaam invoeren'
+                } Until ($firstname)
+        Do {
+                    $lastname = Read-Host 'Achternaam invoeren'
+                } Until ($lastname)
+        Do {
+                    $functie = Read-Host 'Functie invoeren'
+                } Until ($functie)
+         Do {
+                    $company = Read-Host 'Company invoeren'
+                } Until ($company)        
+
+
+        $department = read-host 'Afdeling invoeren indien van toepassing'
+        $copyfrom = Read-Host 'Rechten en postvakken overnemen van (username)'
+        $displayname = $firstname + ' ' + $lastname
+        $logonname = $firstname.SubString(0,1) + '.' + $lastname + '@totaalbed.nl'
+        $samaccountname = $firstname.SubString(0,1) + '.' + $lastname
+        
+        $locatie = 'Zwolle'
+        $straat = "Siegenstraat 5"
+        $postcode = "8028 PT"       
+        
+        New-ADUser -Name $displayname -GivenName $firstname -Surname $lastname -SamAccountName $samaccountname -UserPrincipalName $logonname -Path "OU=User Accounts,OU=Totaalbed,DC=TOTAALBED,DC=LOCAL" -AccountPassword(Read-Host -AsSecureString "Input Password") -Description $Description -StreetAddress $straat -City $locatie -PostalCode $PostCode -Title $functie -Enabled $true -DisplayName $displayname -Department $department -Company $company
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+          $CopyFromUser = Get-ADUser $copyfrom -prop MemberOf
+                    $CopyToUser = Get-ADUser $samaccountname -prop MemberOf
+                    $CopyFromUser.MemberOf | Where{$CopyToUser.MemberOf -notcontains $_} |  Add-ADGroupMember -Member $CopyToUser
+        }
+        
+        # Get current user
+            $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+        # Set Credential
+        $UserCredential = Get-Credential -UserName $CurrentUser -Message "Voer je credentials in voor Exchange"
+        # Connect to EMS
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://totexch01.totaalbed.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
+        Import-PSSession $Session -DisableNameChecking
+
+        Enable-Mailbox -Identity $samaccountname
+        
+        $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        
+        return Write-Host "Account aangemaakt" -ForegroundColor Green
+
+    }
+}
 
 
 #######################################
