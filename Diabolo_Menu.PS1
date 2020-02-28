@@ -454,22 +454,18 @@ Function Create-AKJ-Account {
 					$CopyFromUser.MemberOf | Where{$CopyToUser.MemberOf -notcontains $_} |  Add-ADGroupMember -Member $CopyToUser
         }
         
-        ForEach ($MBXDB in $MBXDbs) {
-        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
-            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
-            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
-            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
-             
-            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
-            # Compare the sizes to find the smallest DB
-            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
-                {
-                $SmallestDBsize = $TotalDBSize
-                $SmallestDB = $MBXDB
-                }
-        }
+        $DB = (Get-MailboxDatabase | foreach { get-childitem $_.edbFilePath | select-object name,length} | sort -property length  )[0] 
+        $DB = $DB.name
+        $DB = $DB.Substring(0,$DB.Length-4)
 
-        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
+        Enable-Mailbox -Identity $samaccountname -Database $DB
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+        $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        }
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
 				foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -522,22 +518,18 @@ Function Create-HGO-Account {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://hgoexch01.hgo.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        ForEach ($MBXDB in $MBXDbs) {
-        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
-            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
-            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
-            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
-             
-            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
-            # Compare the sizes to find the smallest DB
-            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
-                {
-                $SmallestDBsize = $TotalDBSize
-                $SmallestDB = $MBXDB
-                }
-        }
+        $DB = (Get-MailboxDatabase | foreach { get-childitem $_.edbFilePath | select-object name,length} | sort -property length  )[0] 
+        $DB = $DB.name
+        $DB = $DB.Substring(0,$DB.Length-4)
 
-        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
+        Enable-Mailbox -Identity $samaccountname -Database $DB
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+        $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        }
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
 				foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -588,22 +580,18 @@ Function Create-BZO-Account {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://bzoexch01.bz.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        ForEach ($MBXDB in $MBXDbs) {
-        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
-            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
-            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
-            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
-             
-            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
-            # Compare the sizes to find the smallest DB
-            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
-                {
-                $SmallestDBsize = $TotalDBSize
-                $SmallestDB = $MBXDB
-                }
-        }
+        $DB = (Get-MailboxDatabase | foreach { get-childitem $_.edbFilePath | select-object name,length} | sort -property length  )[0] 
+        $DB = $DB.name
+        $DB = $DB.Substring(0,$DB.Length-4)
 
-        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
+        Enable-Mailbox -Identity $samaccountname -Database $DB
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+        $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        }
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
 				foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -655,22 +643,18 @@ Function Create-COM-Account {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://comexch02.companen.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        ForEach ($MBXDB in $MBXDbs) {
-        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
-            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
-            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
-            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
-             
-            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
-            # Compare the sizes to find the smallest DB
-            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
-                {
-                $SmallestDBsize = $TotalDBSize
-                $SmallestDB = $MBXDB
-                }
-        }
+        $DB = (Get-MailboxDatabase | foreach { get-childitem $_.edbFilePath | select-object name,length} | sort -property length  )[0] 
+        $DB = $DB.name
+        $DB = $DB.Substring(0,$DB.Length-4)
 
-        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
+        Enable-Mailbox -Identity $samaccountname -Database $DB
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+        $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        }
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
 				foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -739,22 +723,18 @@ Function Create-DON-Account {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://DONEXCH02.DONATUS.LOCAL/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        ForEach ($MBXDB in $MBXDbs) {
-        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
-            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
-            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
-            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
-             
-            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
-            # Compare the sizes to find the smallest DB
-            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
-                {
-                $SmallestDBsize = $TotalDBSize
-                $SmallestDB = $MBXDB
-                }
-        }
+        $DB = (Get-MailboxDatabase | foreach { get-childitem $_.edbFilePath | select-object name,length} | sort -property length  )[0] 
+        $DB = $DB.name
+        $DB = $DB.Substring(0,$DB.Length-4)
 
-        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
+        Enable-Mailbox -Identity $samaccountname -Database $DB
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+        $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        }
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
                 foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -815,7 +795,18 @@ Function Create-TOT-Account {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://totexch01.totaalbed.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
 
-        Enable-Mailbox -Identity $samaccountname
+        $DB = (Get-MailboxDatabase | foreach { get-childitem $_.edbFilePath | select-object name,length} | sort -property length  )[0] 
+        $DB = $DB.name
+        $DB = $DB.Substring(0,$DB.Length-4)
+
+        Enable-Mailbox -Identity $samaccountname -Database $DB
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+        $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        }
         
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
         foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
@@ -831,9 +822,9 @@ Function Create-TOT-Account {
 #######################################
 
 Function Create-WES-Account {
-    if ($env:COMPUTERNAME -ne "WESAD01"){
+    if ($env:COMPUTERNAME -ne "WESEXCH01"){
         cls
-        return Write-Host "`r`nError - Script wordt niet uitgevoerd op WESAD01!`r`n" -ForegroundColor Red
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op WESEXCH01!`r`n" -ForegroundColor Red
     } else {
         Do {
                     $firstname = Read-Host 'Voornaam invoeren'
@@ -853,7 +844,7 @@ Function Create-WES-Account {
         $samaccountname = $firstname.SubString(0,1) + $lastname
         $agenda = $logonname + '@companen.nl:\Agenda'
         
-        New-ADUser -Name $displayname -GivenName $firstname -Surname $lastname -SamAccountName $samaccountname -UserPrincipalName $logonname -Path "OU=User Accounts,OU=Wijn en Stael,DC=wes,DC=local" -AccountPassword(Read-Host -AsSecureString "Input Password") -Title $functie -OfficePhone $telephone -Enabled $true -DisplayName $displayname
+        #New-ADUser -Name $displayname -GivenName $firstname -Surname $lastname -SamAccountName $samaccountname -UserPrincipalName $logonname -Path "OU=User Accounts,OU=Wijn en Stael,DC=wes,DC=local" -AccountPassword(Read-Host -AsSecureString "Input Password") -Title $functie -OfficePhone $telephone -Enabled $true -DisplayName $displayname
         
         if (-not ([string]::IsNullOrEmpty($copyfrom)))
         {
@@ -869,31 +860,19 @@ Function Create-WES-Account {
         # Connect to EMS
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://wesexch01.wes.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
         Import-PSSession $Session -DisableNameChecking
-
-        $MBXDbs = Get-MailboxDatabase
  
-        # Loop through each of the MBXDbs
- 
-        ForEach ($MBXDB in $MBXDbs) {
-        # Get current mailboxes sizes by summing the size of all mailboxes and "Deleted Items" in the database
-            $TotalItemSize = Get-MailboxStatistics -Database $MBXDB | %{$_.TotalItemSize.Value.ToMB()} | Measure-Object -sum
-            $TotalDeletedItemSize = Get-MailboxStatistics -Database $MBXDB.DistinguishedName | %{$_.TotalDeletedItemSize.Value.ToMB()} | Measure-Object -sum
-            #Get-MailboxDatabase and the DatabaseSize property was not used since it does not return a value in some environments  as of 2010 SP2
-             
-            $TotalDBSize = $TotalItemSize.Sum + $TotalDeletedItemSize.Sum
-            # Compare the sizes to find the smallest DB
-            If (($TotalDBSize -lt $SmallestDBsize) -or ($SmallestDBsize -eq $null))
-                {
-                $SmallestDBsize = $TotalDBSize
-                $SmallestDB = $MBXDB
-                }
-        }
+        $DB = (Get-MailboxDatabase | foreach { get-childitem $_.edbFilePath | select-object name,length} | sort -property length  )[0] 
+        $DB = $DB.name
+        $DB = $DB.Substring(0,$DB.Length-4)
 
-        Enable-Mailbox -Identity $samaccountname -Database $SmallestDB
+        Enable-Mailbox -Identity $samaccountname -Database $DB
         
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
         $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
                 foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
         foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        }
 
         Write-Host "Log nu in met het account en start outlook op.`r`nLog vervolgens uit en druk op enter." -ForegroundColor Green
         pause
