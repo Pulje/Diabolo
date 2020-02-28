@@ -8,8 +8,10 @@ Bij vragen, opmerkingen of enige ander contact neem dan contact op met [Sven] of
 ## Alpha [0.1]
 
 ### Added
-- 28-2-2020 - [JEL] - TOT Getest en toegevoegd.
-- 25-2-2020 - [RBE] - Uploaden script.
+- 28-2-2020 - [RBE] - Kiezen van kleinste mailbox database toegevoegd.
+- 28-2-2020 - [RBE] - Account aanmaken voor WES getest en toegevoegd.
+- 28-2-2020 - [JEL] - Account aanmaken voor TOT getest en toegevoegd.
+- 25-2-2020 - [RBE] - Uploaden script op Github.
 - 21-2-2020 - [RBE] - Akkoord voor script van Xander Hendrickx.
 - 19-2-2020 - [JEL] - Account aanmaken voor BZO toegevoegd, nog niet getest.
 - 17-2-2020 - [RBE] - Account aanmaken voor AKJ/HGO/COMPANEN/DONATUS getest en toegevoegd.
