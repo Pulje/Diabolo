@@ -401,9 +401,9 @@ Function Copy-mailbox {
 #######################################
 
 Function Create-AKJ-Account {
-    if ($env:COMPUTERNAME -ne "AKJAD01"){
+    if ($env:COMPUTERNAME -ne "AKJEXCH01"){
         cls
-        return Write-Host "`r`nError - Script wordt niet uitgevoerd op AKJAD01!`r`n" -ForegroundColor Red
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op AKJEXCH01!`r`n" -ForegroundColor Red
     } else {
         Do {
 					$firstname = Read-Host 'Voornaam invoeren'
@@ -453,6 +453,14 @@ Function Create-AKJ-Account {
 					$CopyToUser = Get-ADUser $samaccountname -prop MemberOf
 					$CopyFromUser.MemberOf | Where{$CopyToUser.MemberOf -notcontains $_} |  Add-ADGroupMember -Member $CopyToUser
         }
+
+        # Get current user
+        $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+        # Set Credential
+        $UserCredential = Get-Credential -UserName $CurrentUser -Message "Voer je credentials in voor Exchange"
+        # Connect to EMS
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://AKJEXCH01.akj.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
+        Import-PSSession $Session -DisableNameChecking
         
         $DB = (Get-MailboxDatabase | foreach { get-childitem $_.edbFilePath | select-object name,length} | sort -property length  )[0] 
         $DB = $DB.name
@@ -482,9 +490,9 @@ Function Create-AKJ-Account {
 #######################################
 
 Function Create-HGO-Account {
-    if ($env:COMPUTERNAME -ne "HGOAD01"){
+    if ($env:COMPUTERNAME -ne "HGOEXCH01"){
         cls
-        return Write-Host "`r`nError - Script wordt niet uitgevoerd op HGOAD01!`r`n" -ForegroundColor Red
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op HGOEXCH01!`r`n" -ForegroundColor Red
     } else {
         Do {
 					$firstname = Read-Host 'Voornaam invoeren'
@@ -545,9 +553,9 @@ Function Create-HGO-Account {
 #######################################
 
 Function Create-BZO-Account {
-    if ($env:COMPUTERNAME -ne "BZOAD01"){
+    if ($env:COMPUTERNAME -ne "bzoexch01"){
         cls
-        return Write-Host "`r`nError - Script wordt niet uitgevoerd op BZOAD01!`r`n" -ForegroundColor Red
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op bzoexch01!`r`n" -ForegroundColor Red
     } else {
         Do {
 					$firstname = Read-Host 'Voornaam invoeren'
@@ -607,9 +615,9 @@ Function Create-BZO-Account {
 #######################################
 
 Function Create-COM-Account {
-    if ($env:COMPUTERNAME -ne "COMAD02"){
+    if ($env:COMPUTERNAME -ne "comexch02"){
         cls
-        return Write-Host "`r`nError - Script wordt niet uitgevoerd op COMAD02!`r`n" -ForegroundColor Red
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op comexch02!`r`n" -ForegroundColor Red
     } else {
         Do {
 					$firstname = Read-Host 'Voornaam invoeren'
@@ -679,9 +687,9 @@ Function Create-COM-Account {
 #######################################
 
 Function Create-DON-Account {
-    if ($env:COMPUTERNAME -ne "DONAD01"){
+    if ($env:COMPUTERNAME -ne "DONEXCH02"){
         cls
-        return Write-Host "`r`nError - Script wordt niet uitgevoerd op DONAD01!`r`n" -ForegroundColor Red
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op DONEXCH02!`r`n" -ForegroundColor Red
     } else {
         Do {
                     $firstname = Read-Host 'Voornaam invoeren'
@@ -750,9 +758,9 @@ Function Create-DON-Account {
 #######################################
 
 Function Create-TOT-Account {
-    if ($env:COMPUTERNAME -ne "TOTAD01"){
+    if ($env:COMPUTERNAME -ne "totexch01"){
         cls
-        return Write-Host "`r`nError - Script wordt niet uitgevoerd op TOTAD01!`r`n" -ForegroundColor Red
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op totexch01!`r`n" -ForegroundColor Red
     } else {
         Do {
                     $firstname = Read-Host 'Voornaam invoeren'
