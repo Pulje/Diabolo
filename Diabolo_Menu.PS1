@@ -1072,10 +1072,10 @@ Function Create-AKJ-Account {
         return Write-Host "Account aangemaakt" -ForegroundColor Green
 
     }
-}
+} 
 
 #######################################
-# HGO ACCOUNT CREATIE
+# HGO ACCOUNT CREATIE test
 #######################################
 
 Function Create-HGO-Account {
