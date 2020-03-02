@@ -1730,14 +1730,19 @@ $account_menu_create = New-Menu -Name 'Account creatie' -MenuItems @(
 )
 
 $account_menu_create_saas = New-Menu -Name 'SaaS Account creatie' -MenuItems @(
-    (New-MenuItem -Name 'AKJ Account aanmaken (Nog niet klaar)' -Command 'Create-AKJ-Account')
-    (New-MenuItem -Name 'AKJ Zorgstem Account aanmaken' -Command 'Create-AKJZ-Account')
+    (New-MenuItem -Name 'AKJ Account aanmaken (Nog niet klaar)' -Command 'Show-Menu -Menu $account_menu_create_akj')
     (New-MenuItem -Name 'BZO Account aanmaken' -Command 'Create-BZO-Account')
     (New-MenuItem -Name 'COM Account aanmaken' -Command 'Create-COM-Account')
     (New-MenuItem -Name 'DON Account aanmaken' -Command 'Create-DON-Account')
     (New-MenuItem -Name 'HGO Account aanmaken' -Command 'Create-HGO-Account')
     (New-MenuItem -Name 'TOT Account aanmaken' -Command 'Create-TOT-Account')
     (New-MenuItem -Name 'WES Account aanmaken' -Command 'Create-WES-Account')
+    (New-MenuItem -Name '< Terug naar account creatie menu' -Command 'Show-Menu -Menu $account_menu_create')
+)
+
+$account_menu_create_akj = New-Menu -Name 'AKJ Account creatie' -MenuItems @(
+    (New-MenuItem -Name 'AKJ Account aanmaken (Nog niet klaar)' -Command 'Create-AKJ-Account')
+    (New-MenuItem -Name 'AKJ Zorgstem Account aanmaken' -Command 'Create-AKJZ-Account')
     (New-MenuItem -Name '< Terug naar account creatie menu' -Command 'Show-Menu -Menu $account_menu_create')
 )
 
