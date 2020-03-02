@@ -850,7 +850,7 @@ Function Create-WES-Account {
         $displayname = $firstname + ' ' + $lastname
         $logonname = $firstname.SubString(0,1) + '.' + $lastname + '@wijnenstael.nl'
         $samaccountname = $firstname.SubString(0,1) + $lastname
-        $agenda = $logonname + '@companen.nl:\Agenda'
+        $agenda = $logonname + '@wijnenstael.nl:\Agenda'
         
         #New-ADUser -Name $displayname -GivenName $firstname -Surname $lastname -SamAccountName $samaccountname -UserPrincipalName $logonname -Path "OU=User Accounts,OU=Wijn en Stael,DC=wes,DC=local" -AccountPassword(Read-Host -AsSecureString "Input Password") -Title $functie -OfficePhone $telephone -Enabled $true -DisplayName $displayname
         
