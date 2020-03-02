@@ -1075,7 +1075,7 @@ Function Create-AKJ-Account {
 } 
 
 #######################################
-# HGO ACCOUNT CREATIE test
+# HGO ACCOUNT CREATIE
 #######################################
 
 Function Create-HGO-Account {
