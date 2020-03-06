@@ -1484,6 +1484,75 @@ Function Create-WES-Account {
     }
 }
 
+#######################################
+# AKJ Zorgstem ACCOUNT CREATIE
+#######################################
+
+Function Create-AKJZ-Account {
+    if ($env:COMPUTERNAME -ne "AKJEXCH01"){
+        cls
+        return Write-Host "`r`nError - Script wordt niet uitgevoerd op AKJEXCH01!`r`n" -ForegroundColor Red
+    } else {
+        Do {
+                    $firstname = Read-Host 'Voornaam invoeren'
+                } Until ($firstname)
+        Do {
+                    $lastname = Read-Host 'Achternaam invoeren'
+                } Until ($lastname)
+        Do {
+                    $functie = Read-Host 'Functie invoeren (standaard: Cliëntvertrouwenspersonen Wzd)'
+                } Until ($functie)
+        Do {
+                    $telephone = Read-Host '06 nummer invoeren'
+                } Until ($telephone)
+        Do {
+            $description = Read-Host 'Werkdagen volleidg invoeren (bijv: Werkzaam op maandag, dinsdag en vrijdag)'
+        } Until ($description)
+                $copyfrom = Read-Host 'Rechten en postvakken overnemen van (username)'
+        $displayname = $firstname + ' ' + $lastname
+        $logonname = $firstname.SubString(0,1) + '.' + $lastname + '@zorgstemvertrouwenspersonen.nl'
+        $samaccountname = $firstname.SubString(0,1) + $lastname
+        $agenda = $logonname + ':\Agenda'
+        
+        New-ADUser -Name $displayname -GivenName $firstname -Surname $lastname -SamAccountName $samaccountname -UserPrincipalName $logonname -Path "OU=Zorgstem,OU=User Accounts,OU=AKJ Jeugdzorg,DC=AKJ,DC=local" -AccountPassword(Read-Host -AsSecureString "Input Password") -Title $functie -MobilePhone $telephone -Enabled $true -DisplayName $displayname
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+          $CopyFromUser = Get-ADUser $copyfrom -prop MemberOf
+                    $CopyToUser = Get-ADUser $samaccountname -prop MemberOf
+                    $CopyFromUser.MemberOf | Where{$CopyToUser.MemberOf -notcontains $_} |  Add-ADGroupMember -Member $CopyToUser
+        }
+        
+        # Get current user
+            $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+        # Set Credential
+        $UserCredential = Get-Credential -UserName $CurrentUser -Message "Voer je credentials in voor Exchange"
+        # Connect to EMS
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://akjexch01.akj.local/PowerShell/ -Authentication Kerberos -Credential $UserCredential
+        Import-PSSession $Session -DisableNameChecking
+ 
+        $DB = (Get-MailboxDatabase | foreach { get-childitem $_.edbFilePath | select-object name,length} | sort -property length  )[0] 
+        $DB = $DB.name
+        $DB = $DB.Substring(0,$DB.Length-4)
+
+        Enable-Mailbox -Identity $samaccountname -Database $DB
+        
+        if (-not ([string]::IsNullOrEmpty($copyfrom)))
+        {
+        $mailboxes = Get-Mailbox | Get-MailboxPermission -User $copyfrom | get-mailbox
+                foreach($mailbox in $mailboxes) {Add-MailboxPermission -Identity $mailbox.Name -User $logonname -AccessRights FullAccess -InheritanceType All -AutoMapping $false}
+        foreach($mailbox in $mailboxes) {Get-Mailbox $mailbox.Name | Add-ADPermission -User $logonname -ExtendedRights "Send As"}
+        }
+
+        Write-Host "Log nu in met het account en start outlook op.`r`nLog vervolgens uit en druk op enter." -ForegroundColor Green
+        pause
+        
+        set-MailboxFolderPermission $agenda -User default -accessrights LimitedDetails
+
+        return Write-Host "Account aangemaakt" -ForegroundColor Green
+
+    }
+}
 
 
 #######################################
