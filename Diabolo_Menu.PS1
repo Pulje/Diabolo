@@ -1511,7 +1511,7 @@ Function Create-AKJZ-Account {
                 $copyfrom = Read-Host 'Rechten en postvakken overnemen van (username)'
         $displayname = $firstname + ' ' + $lastname
         $logonname = $firstname.SubString(0,1) + '.' + $lastname + '@zorgstemvertrouwenspersonen.nl'
-        $samaccountname = $firstname.SubString(0,1) + $lastname
+        $samaccountname = $firstname.SubString(0,1) + $lastname.SubString(0,3)
         $agenda = $logonname + ':\Agenda'
         
         New-ADUser -Name $displayname -GivenName $firstname -Surname $lastname -SamAccountName $samaccountname -UserPrincipalName $logonname -Path "OU=Zorgstem,OU=User Accounts,OU=AKJ Jeugdzorg,DC=AKJ,DC=local" -AccountPassword(Read-Host -AsSecureString "Input Password") -Title $functie -MobilePhone $telephone -Enabled $true -DisplayName $displayname
